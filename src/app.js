@@ -10,6 +10,12 @@ dotenv.config();
 
 const app = express();
 
+// Enable CORS for all routes
+app.use(require('cors')({
+  origin: 'http://localhost:3000', // Allow requests from frontend
+  credentials: true
+}));
+
 app.use(pinoHttp());
 
 app.use(express.json());
