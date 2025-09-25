@@ -2,8 +2,8 @@
 exports.viewUsers = async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from('users')
-      .select('id, email, created_at');
+      .from('User')
+      .select('id, email'); //add created_at column
     if (error) throw error;
     res.status(200).json({ users: data });
   } catch (err) {
@@ -47,7 +47,7 @@ const bcrypt = require('bcryptjs');
 
 // Signup (Supabase)
 exports.signupUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, username } = req.body;
 
   // Basic validation
   if (!email || !password) {
@@ -57,7 +57,7 @@ exports.signupUser = async (req, res) => {
   try {
     // Check if user exists
     const { data: existingUser, error: findError } = await supabase
-      .from('users')
+      .from('User')
       .select('id')
       .eq('email', email)
       .single();
@@ -69,11 +69,12 @@ exports.signupUser = async (req, res) => {
 
     // Insert user
     const { data, error } = await supabase
-      .from('users')
+      .from('User')
       .insert([
         {
           email: email,
           password: hashedPassword,
+          username: username,
           // is_admin: !!is_admin,
         },
       ])
@@ -116,7 +117,7 @@ exports.loginUser = async (req, res) => {
   try {
     // Find user
     const { data: user, error } = await supabase
-      .from('users')
+      .from('User')
       .select('*')
       .eq('email', email)
       .single();

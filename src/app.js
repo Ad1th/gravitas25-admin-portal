@@ -22,8 +22,9 @@ app.use(express.json());
 // app.use(limiter);
 
 // app.use('/health', require('./routes/health.route'));
-app.use('/auth', require('./routes/auth.route'));
+app.use('/auth', require('./routes/auth.route.js'));
 app.use(express.json());
+app.use('/events', require('./routes/event.route.js'));
 // app.use('/teams', teamRoutes);
 
 // app.use('/jeopardy/admin', jeopardyadmin);
