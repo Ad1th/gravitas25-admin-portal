@@ -6,14 +6,12 @@ const SUPABASE_ANON_KEY =
   process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLIC_ANON_KEY;
 
 if (!SUPABASE_URL) {
-  throw new Error(
-    'Missing SUPABASE_URL (or SUPABASE_PROJECT) environment variable. Set it to your project URL e.g. https://xyzcompany.supabase.co'
-  );
+  console.error('FATAL: SUPABASE_URL is not set in .env. ');
+  process.exit(1);
 }
 if (!SUPABASE_ANON_KEY) {
-  throw new Error(
-    'Missing SUPABASE_ANON_KEY environment variable. Set it to your anon/public key from Supabase settings.'
-  );
+  console.error('FATAL: SUPABASE_ANON_KEY is not set in .env.');
+  process.exit(1);
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
