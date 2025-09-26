@@ -1,4 +1,4 @@
-const { supabase } = require('../config/supabase');              
+const supabase = require('../config/supabase');              
 const logger = require('../utils/logger');
 
 /**
@@ -8,10 +8,11 @@ const getAllSubmissions = async (req, res) => {
   try {
     logger.info('Fetching all submissions from Idea table');
     
+    // Use quoted column name for camelCase column
     const { data: submissions, error } = await supabase
       .from('Idea')
       .select('*')
-      .order('submittedAt', { ascending: false });
+      .order('"submittedAt"', { ascending: false });
 
     if (error) {
       logger.error('Error fetching submissions:', error);
