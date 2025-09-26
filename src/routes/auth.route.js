@@ -1,20 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const {
-  signupUser,
   loginUser,
   viewUsers,
-  refreshAccessToken,
-  logoutUser,
+  createInitialAdmin,
 } = require("../controllers/authController");
 
 // View all users
 router.get("/users", viewUsers);
 
+// Create initial admin (for testing)
+router.post("/setup", createInitialAdmin);
+
 // const validateToken = require("../../middleware/validateTokenHandler");
 // const validateAdmin = require("../../middleware/validateAdminHandler");
 
-router.post("/signup", signupUser);
+// router.post("/signup", signupUser); // Disabled - no new admin creation allowed
 router.post("/login", loginUser);
 // router.post("/refresh", );
 // router.post("/logout", validateToken, logoutUser);

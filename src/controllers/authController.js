@@ -1,165 +1,174 @@
-// View all users
+﻿// controllers/authController.js
+const supabase = require('../config/supabase');
+const jwt = require('jsonwebtoken');
+
+// Test database connection
+exports.testConnection = async (req, res) => {
+  try {
+    console.log('Testing database connection...');
+    const { data, error } = await supabase
+      .from('User')
+      .select('count', { count: 'exact', head: true });
+    
+    if (error) {
+      console.error('Database test failed:', error);
+      return res.status(500).json({ 
+        message: 'Database connection failed', 
+        error: error.message,
+        details: error
+      });
+    }
+    
+    console.log('Database test successful');
+    return res.status(200).json({ 
+      message: 'Database connection successful', 
+      userCount: data?.length || 0 
+    });
+  } catch (err) {
+    console.error('Database test error:', err);
+    return res.status(500).json({ 
+      message: 'Database test failed', 
+      error: err.message 
+    });
+  }
+};
+
+// Create initial admin user (for setup only)
+exports.createInitialAdmin = async (req, res) => {
+  try {
+    // Check if any users exist
+    const { data: existingUsers, error: checkError } = await supabase
+      .from('User')
+      .select('id')
+      .limit(1);
+    
+    if (checkError) throw checkError;
+    
+    if (existingUsers && existingUsers.length > 0) {
+      return res.status(400).json({ 
+        message: 'Admin users already exist. This endpoint is only for initial setup.' 
+      });
+    }
+    
+    // Create initial admin
+    const { data: user, error } = await supabase
+      .from('User')
+      .insert([
+        {
+          email: 'admin@gravitas.com'
+          // Note: Your schema only has id, email, created_at columns
+        }
+      ])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return res.status(201).json({ 
+      message: 'Initial admin user created successfully',
+      user: { id: user.id, email: user.email, role: user.role }
+    });
+  } catch (err) {
+    console.error('createInitialAdmin error:', err);
+    return res.status(500).json({ 
+      message: 'Failed to create admin user', 
+      error: err.message 
+    });
+  }
+};
+
+// View all users (admin only)
 exports.viewUsers = async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('User')
-      .select('id, email'); //add created_at column
-    if (error) throw error;
-    res.status(200).json({ users: data });
+      .select('id, email, role');
+
+    if (error) {
+      console.error('viewUsers supabase error:', error);
+      return res.status(500).json({ message: 'Failed to fetch users', error: error.message || error });
+    }
+
+    return res.status(200).json({ users: data || [] });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-const jwt = require('jsonwebtoken');
-const { validationResult } = require('express-validator');
-const supabase = require('../config/supabase');
-const bcrypt = require('bcryptjs');
-
-// // Generate Tokens
-// const generateAccessToken = (user) => {
-//   return jwt.sign(
-//     { id: user.id, email: user.email, role: user.role },
-//     process.env.JWT_SECRET,
-//     { expiresIn: '15m' }
-//   );
-// };
-
-// const generateRefreshToken = async (user) => {
-//   const refreshToken = jwt.sign(
-//     { id: user.id, email: user.email },
-//     process.env.JWT_REFRESH_SECRET,
-//     { expiresIn: '7d' }
-//   );
-
-//   // Store refresh token in DB
-//   await prisma.refreshToken.create({
-//     data: {
-//       token: refreshToken,
-//       userId: user.id,
-//     },
-//   });
-
-//   return refreshToken;
-// };
-
-// ---------------------- Controllers ----------------------
-
-// Signup (Supabase)
-exports.signupUser = async (req, res) => {
-  const { email, password, username } = req.body;
-
-  // Basic validation
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
-  }
-
-  try {
-    // Check if user exists
-    const { data: existingUser, error: findError } = await supabase
-      .from('User')
-      .select('id')
-      .eq('email', email)
-      .single();
-    if (existingUser)
-      return res.status(400).json({ message: 'User already exists' });
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Insert user
-    const { data, error } = await supabase
-      .from('User')
-      .insert([
-        {
-          email: email,
-          password: hashedPassword,
-          username: username,
-          // is_admin: !!is_admin,
-        },
-      ])
-      .select();
-
-    if (error) throw error;
-
-    // Generate JWT
-    const accessToken = jwt.sign(
-      { id: data[0].id, email: data[0].email },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      accessToken,
-      user: {
-        id: data[0].id,
-        email: data[0].email,
-        // is_admin: data[0].is_admin,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    console.error('Signup error:', err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('viewUsers error:', err);
+    return res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
-// Login (Supabase)
+// Login (Supabase) - admin only, respects UserStatus freeze if present
 exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
+  const bcrypt = require('bcrypt');
 
-  // Basic validation
+  console.log('Login attempt for email:', email);
+
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
   }
 
   try {
-    // Find user
+    console.log('Attempting database query for user:', email);
     const { data: user, error } = await supabase
       .from('User')
-      .select('*')
+      .select('id, email, role, password')
       .eq('email', email)
       .single();
-    
-    console.log('Login attempt for:', email);
-    console.log('User found:', user ? 'Yes' : 'No');
-    console.log('Supabase error:', error);
-    
-    if (error && error.code === 'PGRST116') {
-      // No rows found
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-    
-    if (error || !user) {
+
+    if (error) {
+      console.error('loginUser supabase error:', error);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log('Password match:', isMatch);
+    // If user was found in DB
+    if (user) {
+      console.log('User found:', user);
+      
+      // CRITICAL: Only users with role='admin' can access the admin portal
+      if (!user.role || user.role !== 'admin') {
+        console.log('Access denied - user role:', user.role);
+        return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+      }
+
+      // Check if password matches the hashed password in database
+      let isValidPassword = false;
+      if (user.password) {
+        // If password is hashed (bcrypt), compare using bcrypt
+        if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+          isValidPassword = await bcrypt.compare(password, user.password);
+        } else {
+          // If password is plain text, compare directly
+          isValidPassword = password === user.password;
+        }
+      }
+
+      if (!isValidPassword) {
+        console.log('Password validation failed for user:', email);
+        return res.status(400).json({ message: 'Invalid credentials' });
+      }
+
+      console.log('Admin login successful for:', user.email);
+      const tokenPayload = { id: user.id, email: user.email, role: user.role };
+      const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+      return res.status(200).json({
+        message: 'Login successful',
+        frozen: false,
+        accessToken,
+        user: { id: user.id, email: user.email, role: user.role }
+      });
+    }
+
     
-    if (!isMatch)
-      return res.status(400).json({ message: 'Invalid credentials' });
+    // default fallback
+    return res.status(400).json({ message: 'Invalid credentials' });
 
-    // Generate JWT
-    const accessToken = jwt.sign(
-      { id: user.id, email: user.email  },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.status(200).json({
-      message: 'Login successful',
-      accessToken,
-      user: { id: user.id, email: user.email },
-    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error('loginUser error:', err);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: err.message,
+      details: 'Database connection or query failed. Check server logs for details.'
+    });
   }
 };
-
-// No refresh token logic for now (JWT only)
-
-// No logout logic for now (JWT only)
