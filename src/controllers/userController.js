@@ -6,8 +6,8 @@ exports.getAllUsers = async (req, res) => {
   try {
     const { data: users, error } = await supabase
       .from('User')
-      .select('id, email, username, role, userstatus(is_banned, banned_at, reason)')
-      .order('created_at', { ascending: false });
+      .select('id, email, username, role, userstatus(is_banned, banned_at, reason)');
+      // .order('created_at', { ascending: false });
 
     if (error) {
       console.error('getAllUsers supabase error:', error);

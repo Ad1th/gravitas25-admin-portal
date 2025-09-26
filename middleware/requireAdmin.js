@@ -12,7 +12,7 @@ module.exports = async function (req, res, next) {
     const token = parts[1];
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Verify user exists and is admin
+    // Verify user exists and role == admin
     const { data: user, error } = await supabase
       .from('User')
       .select('id, role, email')
