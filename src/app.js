@@ -12,7 +12,7 @@ const app = express();
 
 // Enable CORS for all routes
 app.use(require('cors')({
-  origin: 'http://localhost:3001', // Allow requests from frontend
+  origin: ['http://localhost:3000', 'http://localhost:3001'], // Allow requests from frontend
   credentials: true
 }));
 
@@ -28,6 +28,7 @@ app.use('/frontend', express.static('frontend'));
 app.use('/auth', require('./routes/auth.route.js'));
 app.use('/users', require('./routes/userRoute.js'));
 app.use('/events', require('./routes/event.route.js'));
+app.use('/submissions', require('./routes/submission.route.js'));
 // app.use('/teams', teamRoutes);
 
 // app.use('/jeopardy/admin', jeopardyadmin);
