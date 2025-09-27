@@ -1,4 +1,4 @@
-// Vercel serverless entrypoint wrapping existing Express app
-const server = require('../src/app');
+const app = require('../src/app');
+const serverless = require('serverless-http');
 
-module.exports = server;
+module.exports = serverless(app);
