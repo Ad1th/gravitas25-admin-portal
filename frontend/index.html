@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MFC CodeXcape - Admin Portal</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- AUTH -->
+  <div id="login-page" class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">MFC CodeXcape</div>
+      <p class="auth-subtitle">Admin Login</p>
+
+      <form id="login-form" class="auth-form">
+        <div class="form-group">
+          <input type="email" id="login-email" class="form-input" placeholder="Email" required />
+        </div>
+        <div class="form-group">
+          <input type="password" id="login-password" class="form-input" placeholder="Password" required />
+        </div>
+        <div id="login-error" class="error-message hidden"></div>
+        <button id="login-btn" type="submit" class="btn btn-primary">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </button>
+      </form>
+
+      <div class="auth-links">
+        <p class="auth-note">Admin access only.</p>
+      </div>
+    </div>
+  </div>
+  <!-- DASHBOARD PAGE -->
+  <div id="dashboard-page" class="dashboard hidden">
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">Admin</div>
+        <div class="sidebar-subtitle">MFC Gravitas 2025</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item nav-link active" onclick="navigateToSection('events-section')"><i class="fas fa-bolt"></i> Events</a>
+        <a href="#" class="nav-item nav-link" onclick="navigateToSection('users-section')"><i class="fas fa-users"></i> Users</a>
+        <a href="#" class="nav-item nav-link" onclick="navigateToSection('submissions-section')"><i class="fas fa-tasks"></i> Submissions</a>
+        <a href="#" class="nav-item nav-link" onclick="navigateToSection('scoring-section')"><i class="fas fa-trophy"></i> Scoring</a>
+        <a href="#" id="logout-btn" class="nav-item"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <header class="main-header">
+        <h1 id="section-title" class="header-title">Event Flow</h1>
+        <div class="header-actions">
+          <div class="user-menu">
+            <div id="user-avatar" class="user-avatar">A</div>
+            <div>
+              <div id="user-name">Admin User</div>
+              <div id="user-email">admin@gravitas.com</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-content">
+        <section id="events-section" class="content-section active">
+          <div class="section-header">
+            <h2 class="section-title">Live Event Monitor</h2>
+            <div class="section-controls">
+              <div class="live-indicator"><span class="live-dot"></span> Live</div>
+              <button id="refresh-events" class="refresh-btn">🔄 Refresh</button>
+            </div>
+          </div>
+          <div id="event-list" class="event-list"></div>
+        </section>
+
+        <section id="users-section" class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">User Management</h2>
+            <div class="section-controls">
+              <button id="refresh-users" class="refresh-btn">🔄 Refresh</button>
+            </div>
+          </div>
+          <div id="users-list" class="users-list"></div>
+        </section>
+
+        <section id="submissions-section" class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Hackathon Submissions</h2>
+            <div class="section-controls">
+              <button id="refresh-submissions" class="refresh-btn">🔄 Refresh</button>
+              <button id="export-submissions" class="export-btn">📊 Export</button>
+            </div>
+          </div>
+          <div class="submissions-filters">
+            <select id="team-filter" class="filter-select">
+              <option value="">All Teams</option>
+            </select>
+            <select id="type-filter" class="filter-select">
+              <option value="">All Types</option>
+            </select>
+            <input type="text" id="search-submissions" class="search-input" placeholder="Search by title or description...">
+          </div>
+          <div id="submissions-list" class="submissions-list"></div>
+        </section>
+
+        <section id="scoring-section" class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Hackathon Scoring</h2>
+            <div class="section-controls">
+              <button id="refresh-scores" class="refresh-btn">🔄 Refresh</button>
+              <button id="view-leaderboard" class="btn btn-secondary">🏆 Leaderboard</button>
+            </div>
+          </div>
+          
+          <div class="scoring-tabs">
+            <button id="score-entry-tab" class="tab-button active" onclick="switchScoringTab('entry')">Score Entry</button>
+            <button id="score-overview-tab" class="tab-button" onclick="switchScoringTab('overview')">Score Overview</button>
+          </div>
+
+          <!-- Score Entry Tab -->
+          <div id="score-entry-content" class="tab-content active">
+            <div class="score-entry-form">
+              <h3>Add/Update Team Score</h3>
+              <form id="scoring-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="team-id-input">Team ID:</label>
+                    <input type="text" id="team-id-input" class="form-input" placeholder="Enter team UUID" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="review-number-select">Review Round:</label>
+                    <select id="review-number-select" class="form-input" required>
+                      <option value="">Select Review Round</option>
+                      <option value="1">Review 1</option>
+                      <option value="2">Review 2</option>
+                      <option value="3">Review 3</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="points-input">Points:</label>
+                    <input type="number" id="points-input" class="form-input" min="0" step="0.1" placeholder="Enter points" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add/Update Score</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Score Overview Tab -->
+          <div id="score-overview-content" class="tab-content">
+            <div class="score-filters">
+              <input type="text" id="search-scores" class="search-input" placeholder="Search by team ID...">
+              <select id="review-filter" class="filter-select">
+                <option value="">All Reviews</option>
+                <option value="1">Review 1</option>
+                <option value="2">Review 2</option>
+                <option value="3">Review 3</option>
+              </select>
+            </div>
+            <div id="scores-list" class="scores-list"></div>
+          </div>
+
+          <!-- Leaderboard Modal -->
+          <div id="leaderboard-modal" class="modal hidden">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3>🏆 Leaderboard</h3>
+                <button class="modal-close" onclick="closeLeaderboard()">&times;</button>
+              </div>
+              <div id="leaderboard-content" class="leaderboard-content"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="main.js"></script>
+</body>
+</html>
+
