@@ -1,33 +1,36 @@
 {
-  "name": "Gravitas-Backend-25",
+  "name": "g",
   "version": "1.0.0",
-  "description": "",
   "main": "./src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+
     "redis:check": "redis-cli ping",
     "health:check": "curl http://localhost:3000/health",
+
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
+
     "lint": "eslint . --ext .js,.mjs,.ts",
     "lint:fix": "eslint . --ext .js,.mjs,.ts --fix",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint-staged": "lint-staged",
     "prepare": "husky install",
+
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo 'Nothing to build for backend'"
+
+    "build:backend": "echo 'Nothing to build for backend'",
+    "build:frontend": "cd frontend && pnpm install && pnpm run build",
+    "build": "pnpm run build:backend && pnpm run build:frontend"
   },
+  "packageManager": "pnpm@10.12.1",
   "prisma": {
     "schema": "prisma/schema.prisma"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.12.1",
   "dependencies": {
     "@prisma/client": "^6.13.0",
     "@supabase/supabase-js": "^2.57.4",
