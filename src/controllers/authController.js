@@ -60,13 +60,14 @@ exports.createInitialAdmin = async (req, res) => {
         }
       ])
       .select()
-      .single();
+      // .single();
     
     if (error) throw error;
     
+    const createdUser = user && user.length > 0 ? user[0] : user;
     return res.status(201).json({ 
       message: 'Initial admin user created successfully',
-      user: { id: user.id, email: user.email, role: user.role }
+      user: { id: createdUser.id, email: createdUser.email, role: createdUser.role }
     });
   } catch (err) {
     console.error('createInitialAdmin error:', err);
@@ -113,32 +114,33 @@ exports.loginUser = async (req, res) => {
       .from('User')
       .select('id, email, role, password')
       .eq('email', email)
-      .single();
+      // .single();
 
     if (error) {
       console.error('loginUser supabase error:', error);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // If user was found in DB
-    if (user) {
-      console.log('User found:', user);
+    // If user was found in DB (check if array has results)
+    if (user && user.length > 0) {
+      const foundUser = user[0]; // Get the first (and should be only) user
+      console.log('User found:', foundUser);
       
       // CRITICAL: Only users with role='admin' can access the admin portal
-      if (!user.role || user.role !== 'admin') {
-        console.log('Access denied - user role:', user.role);
+      if (!foundUser.role || foundUser.role !== 'admin') {
+        console.log('Access denied - user role:', foundUser.role);
         return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
       }
 
       // Check if password matches the hashed password in database
       let isValidPassword = false;
-      if (user.password) {
+      if (foundUser.password) {
         // If password is hashed (bcrypt), compare using bcrypt
-        if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
-          isValidPassword = await bcrypt.compare(password, user.password);
+        if (foundUser.password.startsWith('$2b$') || foundUser.password.startsWith('$2a$')) {
+          isValidPassword = await bcrypt.compare(password, foundUser.password);
         } else {
           // If password is plain text, compare directly
-          isValidPassword = password === user.password;
+          isValidPassword = password === foundUser.password;
         }
       }
 
@@ -147,15 +149,15 @@ exports.loginUser = async (req, res) => {
         return res.status(400).json({ message: 'Invalid credentials' });
       }
 
-      console.log('Admin login successful for:', user.email);
-      const tokenPayload = { id: user.id, email: user.email, role: user.role };
+      console.log('Admin login successful for:', foundUser.email);
+      const tokenPayload = { id: foundUser.id, email: foundUser.email, role: foundUser.role };
       const accessToken = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1d' });
 
       return res.status(200).json({
         message: 'Login successful',
         frozen: false,
         accessToken,
-        user: { id: user.id, email: user.email, role: user.role }
+        user: { id: foundUser.id, email: foundUser.email, role: foundUser.role }
       });
     }
 

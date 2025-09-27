@@ -29,6 +29,7 @@ app.use('/auth', require('./routes/auth.route.js'));
 app.use('/users', require('./routes/userRoute.js'));
 app.use('/events', require('./routes/event.route.js'));
 app.use('/submissions', require('./routes/submission.route.js'));
+app.use('/scores', require('./routes/score.route.js'));
 // app.use('/teams', teamRoutes);
 
 // app.use('/jeopardy/admin', jeopardyadmin);
