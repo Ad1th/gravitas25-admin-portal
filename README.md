@@ -18,7 +18,6 @@ A full-stack web application for managing Gravitas 25 event administration. This
 - **Node.js** with Express.js framework
 - **Supabase** for database and authentication
 - **JWT** for secure authentication
-- **Prisma** ORM for database operations
 - **Redis** for caching and session management
 - **bcrypt** for password hashing
 
@@ -42,8 +41,7 @@ A full-stack web application for managing Gravitas 25 event administration. This
 
 - Node.js (v14 or higher)
 - pnpm (recommended) or npm
-- PostgreSQL database
-- Redis server
+- Redis server (optional, for caching)
 - Supabase project
 
 ### Setup
@@ -72,13 +70,10 @@ A full-stack web application for managing Gravitas 25 event administration. This
    Configure your `.env` file with the following variables:
 
    ```env
-   # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/database_name?schema=public"
-
    # Server
    PORT=4000
 
-   # Redis
+   # Redis (optional, for caching)
    REDIS_URL=redis://localhost:6379
 
    # Supabase
@@ -89,18 +84,11 @@ A full-stack web application for managing Gravitas 25 event administration. This
    JWT_SECRET=your_jwt_secret_key
    ```
 
-4. **Database Setup**
-
-   ```bash
-   # Generate Prisma client
-   pnpm run prisma:generate
-
-   # Run database migrations
-   pnpm run prisma:migrate
-
-   # Push schema to database
-   pnpm run prisma:push
-   ```
+4. **Supabase Setup**
+   - Create a new Supabase project at [supabase.com](https://supabase.com)
+   - Set up your database tables (User, Event, Submission, etc.) in the Supabase dashboard
+   - Get your project URL and anon key from the Supabase project settings
+   - Update your `.env` file with these credentials
 
 5. **Verify Redis Connection**
    ```bash
@@ -169,7 +157,8 @@ The frontend is served statically from the `/frontend` directory and accessible 
 │       └── logger.js   # Application logging
 ├── package.json        # Main package configuration
 ├── vercel.json        # Vercel deployment config
-└── .env.example       # Environment variables template
+├── .env.example       # Environment variables template
+└── .gitignore         # Git ignore rules
 ```
 
 ## 🔗 API Endpoints
@@ -219,10 +208,9 @@ The frontend is served statically from the `/frontend` directory and accessible 
 
 ### Database
 
-- `pnpm run prisma:generate` - Generate Prisma client
-- `pnpm run prisma:migrate` - Run database migrations
-- `pnpm run prisma:push` - Push schema to database
-- `pnpm run prisma:studio` - Open Prisma Studio
+- Database operations are handled through Supabase dashboard
+- Use Supabase SQL editor for database queries and schema changes
+- Access Supabase dashboard for table management and data viewing
 
 ### Code Quality
 
