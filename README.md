@@ -1,6 +1,6 @@
 # Gravitas 25 Admin Portal
 
-A full-stack web application for managing Gravitas 25 event administration. This project consists of a Node.js/Express backend with Supabase integration and a vanilla HTML/CSS/JavaScript frontend for administrative tasks.
+A full-stack web application for managing MFC's CodeXcape Gravitas 25 event administration. This project consists of a Node.js/Express backend with Supabase integration and a vanilla HTML/CSS/JavaScript frontend for administrative tasks.
 
 ## 🚀 Features
 
