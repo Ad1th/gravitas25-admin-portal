@@ -26,7 +26,7 @@ A full-stack web application for managing MFC's CodeXcape Gravitas 25 event admi
 - **Vanilla HTML/CSS/JavaScript**
 - **Font Awesome** icons
 - **Google Fonts** (Inter)
-
+ 
 ### Development & Deployment
 
 - **pnpm** package manager
